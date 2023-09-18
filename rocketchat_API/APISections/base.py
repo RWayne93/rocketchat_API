@@ -1,6 +1,6 @@
 import re
-
-import requests
+import httpx
+import asyncio
 
 from rocketchat_API.APIExceptions.RocketExceptions import (
     RocketAuthenticationException,
@@ -24,33 +24,42 @@ class RocketChatBase:
         session=None,
         client_certs=None,
     ):
-        """Creates a RocketChat object and does login on the specified server"""
+
         self.headers = {}
         self.server_url = server_url
         self.proxies = proxies
         self.ssl_verify = ssl_verify
         self.cert = client_certs
         self.timeout = timeout
-        self.req = session or requests
+        self.req = session or httpx.AsyncClient()
+
+        # If user and password are provided, schedule the login coroutine
         if user and password:
-            self.login(user, password)  # skipcq: PTC-W1006
-        if auth_token and user_id:
+            self.login_task = asyncio.create_task(self.login(user, password))
+        elif auth_token and user_id:
             self.headers["X-Auth-Token"] = auth_token
             self.headers["X-User-Id"] = user_id
+        else:
+            self.login_task = None
 
     @staticmethod
     def __reduce_kwargs(kwargs):
         if "kwargs" in kwargs:
             for arg in kwargs["kwargs"].keys():
                 kwargs[arg] = kwargs["kwargs"][arg]
-
             del kwargs["kwargs"]
         return kwargs
+    
+    async def __aenter__(self):
+        self.req = httpx.AsyncClient(trust_env=self.ssl_verify, client_cert=self.cert, proxies=self.proxies)
+        return self
 
-    def call_api_delete(self, method):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.req.aclose()
+
+    async def call_api_delete(self, method):
         url = self.server_url + self.API_path + method
-
-        return self.req.delete(
+        return await self.req.delete(
             url,
             headers=self.headers,
             verify=self.ssl_verify,
@@ -59,19 +68,18 @@ class RocketChatBase:
             timeout=self.timeout,
         )
 
-    def call_api_get(self, method, api_path=None, **kwargs):
+    async def call_api_get(self, method, api_path=None, **kwargs):
         args = self.__reduce_kwargs(kwargs)
         if not api_path:
             api_path = self.API_path
         url = self.server_url + api_path + method
-        # convert to key[]=val1&key[]=val2 for args like key=[val1, val2], else key=val
         params = "&".join(
             "&".join(i + "[]=" + j for j in args[i])
             if isinstance(args[i], list)
             else i + "=" + str(args[i])
             for i in args
         )
-        return self.req.get(
+        return await self.req.get(
             "%s?%s" % (url, params),
             headers=self.headers,
             verify=self.ssl_verify,
@@ -80,30 +88,25 @@ class RocketChatBase:
             timeout=self.timeout,
         )
 
-    def call_api_post(self, method, files=None, use_json=None, **kwargs):
+    async def call_api_post(self, method, files=None, use_json=None, **kwargs):
         reduced_args = self.__reduce_kwargs(kwargs)
-        # Since pass is a reserved word in Python it has to be injected on the request dict
-        # Some methods use pass (users.register) and others password (users.create)
         if "password" in reduced_args and method != "users.create":
             reduced_args["pass"] = reduced_args["password"]
             del reduced_args["password"]
         if use_json is None:
-            # see https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
-            # > The json parameter is ignored if either data or files is passed.
-            # If files are sent, json should not be used
             use_json = files is None
         if use_json:
-            return self.req.post(
+            return await self.req.post(
                 self.server_url + self.API_path + method,
                 json=reduced_args,
                 files=files,
                 headers=self.headers,
-                verify=self.ssl_verify,
-                cert=self.cert,
-                proxies=self.proxies,
+                #trust_env=self.ssl_verify,
+                #cert=self.cert,
+                #proxies=self.proxies,
                 timeout=self.timeout,
             )
-        return self.req.post(
+        return await self.req.post(
             self.server_url + self.API_path + method,
             data=reduced_args,
             files=files,
@@ -114,15 +117,12 @@ class RocketChatBase:
             timeout=self.timeout,
         )
 
-    def call_api_put(self, method, files=None, use_json=None, **kwargs):
+    async def call_api_put(self, method, files=None, use_json=None, **kwargs):
         reduced_args = self.__reduce_kwargs(kwargs)
         if use_json is None:
-            # see https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
-            # > The json parameter is ignored if either data or files is passed.
-            # If files are sent, json should not be used
             use_json = files is None
         if use_json:
-            return self.req.put(
+            return await self.req.put(
                 self.server_url + self.API_path + method,
                 json=reduced_args,
                 files=files,
@@ -132,20 +132,18 @@ class RocketChatBase:
                 proxies=self.proxies,
                 timeout=self.timeout,
             )
-        return self.req.put(
+        return await self.req.put(
             self.server_url + self.API_path + method,
             data=reduced_args,
             files=files,
             headers=self.headers,
-            verify=self.ssl_verify,
-            cert=self.cert,
-            proxies=self.proxies,
+            #verify=self.ssl_verify,
+            #cert=self.cert,
+            #proxies=self.proxies,
             timeout=self.timeout,
         )
 
-    # Authentication
-
-    def login(self, user, password):
+    async def login(self, user, password):
         request_data = {"password": password}
         if re.match(
             r"^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$",
@@ -154,12 +152,12 @@ class RocketChatBase:
             request_data["user"] = user
         else:
             request_data["username"] = user
-        login_request = self.req.post(
+        login_request = await self.req.post(
             self.server_url + self.API_path + "login",
             data=request_data,
-            verify=self.ssl_verify,
-            proxies=self.proxies,
-            cert=self.cert,
+           # verify=self.ssl_verify,
+           # proxies=self.proxies,
+           # cert=self.cert,
             timeout=self.timeout,
         )
         if login_request.status_code == 401:
@@ -177,10 +175,8 @@ class RocketChatBase:
 
         raise RocketConnectionException()
 
-    def logout(self, **kwargs):
-        """Invalidate your REST rocketchat_API authentication token."""
-        return self.call_api_post("logout", kwargs=kwargs)
+    async def logout(self, **kwargs):
+        return await self.call_api_post("logout", kwargs=kwargs)
 
-    def info(self, **kwargs):
-        """Information about the Rocket.Chat server."""
-        return self.call_api_get("info", api_path="/api/", kwargs=kwargs)
+    async def info(self, **kwargs):
+        return await self.call_api_get("info", api_path="/api/", kwargs=kwargs)
