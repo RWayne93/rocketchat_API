@@ -55,6 +55,10 @@ class RocketChatBase:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            print(f"Exception type: {exc_type}")
+            print(f"Exception value: {exc_val}")
+            print(f"Exception traceback: {exc_tb}")
         await self.req.aclose()
 
     async def call_api_delete(self, method):
