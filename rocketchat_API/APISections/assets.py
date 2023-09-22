@@ -6,7 +6,7 @@ from rocketchat_API.APISections.base import RocketChatBase
 
 
 class RocketChatAssets(RocketChatBase):
-    def assets_set_asset(self, asset_name, file, **kwargs):
+    async def assets_set_asset(self, asset_name, file, **kwargs):
         """Set an asset image by name."""
         server_info = self.info().json()
         content_type = mimetypes.MimeTypes().guess_type(file)
@@ -21,7 +21,7 @@ class RocketChatAssets(RocketChatBase):
             file_name: (file, open(file, "rb"), content_type[0], {"Expires": "0"}),
         }
 
-        return self.call_api_post(
+        return await self.call_api_post(
             "assets.setAsset",
             kwargs=kwargs,
             assetName=asset_name,
@@ -29,6 +29,6 @@ class RocketChatAssets(RocketChatBase):
             files=files,
         )
 
-    def assets_unset_asset(self, asset_name):
+    async def assets_unset_asset(self, asset_name):
         """Unset an asset by name"""
-        return self.call_api_post("assets.unsetAsset", assetName=asset_name)
+        return await self.call_api_post("assets.unsetAsset", assetName=asset_name)
