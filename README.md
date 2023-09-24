@@ -14,19 +14,20 @@ Clone our repository and `python3 setup.py install`
 
 ### Usage
 ```python
-from pprint import pprint
+import asyncio
 from rocketchat_API.rocketchat import RocketChat
 
-proxy_dict = {
-    "http"  : "http://127.0.0.1:3128",
-    "https" : "https://127.0.0.1:3128",
-}
+async def main():
+    rocket = RocketChat('user', 'pass', server_url='server_url')
+    if rocket.login_task:
+        await rocket.login_task
+        print('Login successful!')
 
-rocket = RocketChat('user', 'pass', server_url='https://demo.rocket.chat', proxies=proxy_dict)
-pprint(rocket.me().json())
-pprint(rocket.channels_list().json())
-pprint(rocket.chat_post_message('good news everyone!', channel='GENERAL', alias='Farnsworth').json())
-pprint(rocket.channels_history('GENERAL', count=5).json())
+    # Use the methods to test
+    response = await rocket.chat_post_message('test message using asynchronous library!', room_id='room_id')
+    print(response.json())
+    
+asyncio.run(main())
 ```
 
 *note*: every method returns a [requests](https://github.com/kennethreitz/requests) Response object.
