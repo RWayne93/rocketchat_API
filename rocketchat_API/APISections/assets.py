@@ -1,4 +1,5 @@
 import mimetypes
+from typing import Any
 
 from packaging import version
 
@@ -6,7 +7,9 @@ from rocketchat_API.APISections.base import RocketChatBase
 
 
 class RocketChatAssets(RocketChatBase):
-    async def assets_set_asset(self, asset_name, file, **kwargs):
+    async def assets_set_asset(
+        self, asset_name: str, file: str, **kwargs: Any
+    ) -> dict[str, Any] | None:
         """Set an asset image by name."""
         server_info = self.info().json()
         content_type = mimetypes.MimeTypes().guess_type(file)
@@ -29,6 +32,8 @@ class RocketChatAssets(RocketChatBase):
             files=files,
         )
 
-    async def assets_unset_asset(self, asset_name):
+    async def assets_unset_asset(
+        self, asset_name: str
+    ) -> dict[str, Any] | None:
         """Unset an asset by name"""
         return await self.call_api_post("assets.unsetAsset", assetName=asset_name)
