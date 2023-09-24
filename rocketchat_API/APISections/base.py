@@ -51,7 +51,7 @@ class RocketChatBase:
         return kwargs
     
     async def __aenter__(self) -> "RocketChatBase":
-        self.req = httpx.AsyncClient(trust_env=self.ssl_verify, client_cert=self.cert, proxies=self.proxies)
+        self.req = httpx.AsyncClient(trust_env=self.ssl_verify, verify=self.ssl_verify, client_cert=self.cert, proxies=self.proxies)
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -66,9 +66,9 @@ class RocketChatBase:
         return await self.req.delete(
             url,
             headers=self.headers,
-            verify=self.ssl_verify,
-            cert=self.cert,
-            proxies=self.proxies,
+            #verify=self.ssl_verify,
+            #cert=self.cert,
+            #proxies=self.proxies,
             timeout=self.timeout,
         )
 
@@ -86,9 +86,9 @@ class RocketChatBase:
         return await self.req.get(
             "%s?%s" % (url, params),
             headers=self.headers,
-            verify=self.ssl_verify,
-            cert=self.cert,
-            proxies=self.proxies,
+            #verify=self.ssl_verify,
+            #cert=self.cert,
+            #proxies=self.proxies,
             timeout=self.timeout,
         )
 
@@ -121,9 +121,9 @@ class RocketChatBase:
             data=reduced_args,
             files=files,
             headers=self.headers,
-            verify=self.ssl_verify,
-            cert=self.cert,
-            proxies=self.proxies,
+            #verify=self.ssl_verify,
+            #cert=self.cert,
+            #proxies=self.proxies,
             timeout=self.timeout,
         )
 
@@ -143,9 +143,9 @@ class RocketChatBase:
                 json=reduced_args,
                 files=files,
                 headers=self.headers,
-                verify=self.ssl_verify,
-                cert=self.cert,
-                proxies=self.proxies,
+                #verify=self.ssl_verify,
+                #cert=self.cert,
+                #proxies=self.proxies,
                 timeout=self.timeout,
             )
         return await self.req.put(
