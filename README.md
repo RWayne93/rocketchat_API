@@ -36,8 +36,8 @@ asyncio.run(main())
 If you are going to make a couple of request, you can user connection pooling provided by `requests`. This will save significant time by avoiding re-negotiation of TLS (SSL) with the chat server on each call.
 
 ```python
-from requests import sessions
-from pprint import pprint
+import asyncio
+import httpx
 from rocketchat_API.rocketchat import RocketChat
 
 async def main():
