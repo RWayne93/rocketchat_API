@@ -40,12 +40,16 @@ from requests import sessions
 from pprint import pprint
 from rocketchat_API.rocketchat import RocketChat
 
-with sessions.Session() as session:
-    rocket = RocketChat('user', 'pass', server_url='https://demo.rocket.chat', session=session)
-    pprint(rocket.me().json())
-    pprint(rocket.channels_list().json())
-    pprint(rocket.chat_post_message('good news everyone!', channel='GENERAL', alias='Farnsworth').json())
-    pprint(rocket.channels_history('GENERAL', count=5).json())
+async def main():
+    async with httpx.AsyncClient() as client:
+    rocket = RocketChat('user', 'pass', server_url='server_url', client=client)
+    if rocket.login_task:
+        await rocket.login_task
+    
+    print(rocket.channels_list().json())
+    print(rocket.channels_history('GENERAL', count=5).json())
+
+asyncio.run(main())
 ```
  
 #### Using a token for authentication instead of user and password
