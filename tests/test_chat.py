@@ -2,14 +2,14 @@ import pytest
 
 from rocketchat_API.APIExceptions.RocketExceptions import RocketMissingParamException
 
-
+@pytest.mark.asyncio
 def test_chat_post_notext_message(logged_rocket):
     chat_post_message = logged_rocket.chat_post_message(None, channel="GENERAL").json()
     assert chat_post_message.get("channel") == "GENERAL"
     assert chat_post_message.get("message").get("msg") == ""
     assert chat_post_message.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_post_update_delete_message(logged_rocket):
     chat_post_message = logged_rocket.chat_post_message(
         "hello",
@@ -48,7 +48,7 @@ def test_chat_post_update_delete_message(logged_rocket):
     ).json()
     assert chat_delete.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_send_notext_message(logged_rocket):
     chat_send_message = logged_rocket.chat_send_message({"rid": "GENERAL"}).json()
     assert chat_send_message.get("message").get("rid") == "GENERAL"
@@ -57,7 +57,7 @@ def test_chat_send_notext_message(logged_rocket):
     with pytest.raises(RocketMissingParamException):
         logged_rocket.chat_send_message({"msg": "General Kenobi"})
 
-
+@pytest.mark.asyncio
 def test_chat_send_custom_id_delete_message(logged_rocket):
     chat_send_message = logged_rocket.chat_send_message(
         {"rid": "GENERAL", "msg": "Hello There", "_id": "42"}
@@ -72,7 +72,7 @@ def test_chat_send_custom_id_delete_message(logged_rocket):
     ).json()
     assert chat_delete.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_post_react(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
@@ -83,7 +83,7 @@ def test_chat_post_react(logged_rocket):
     chat_react = logged_rocket.chat_react(msg_id=message_id).json()
     assert chat_react.get("success")
 
-
+@pytest.mark.asyncio
 def test_post_pin_unpin(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
@@ -98,7 +98,7 @@ def test_post_pin_unpin(logged_rocket):
     chat_unpin_message = logged_rocket.chat_unpin_message(message_id).json()
     assert chat_unpin_message.get("success")
 
-
+@pytest.mark.asyncio
 def test_post_star_unstar_get_starred_messages(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
@@ -127,14 +127,14 @@ def test_post_star_unstar_get_starred_messages(logged_rocket):
     chat_unstar_message = logged_rocket.chat_unstar_message(message_id).json()
     assert chat_unstar_message.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_search(logged_rocket):
     chat_search = logged_rocket.chat_search(
         room_id="GENERAL", search_text="hello"
     ).json()
     assert chat_search.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_get_message_read_receipts(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
@@ -148,7 +148,7 @@ def test_chat_get_message_read_receipts(logged_rocket):
     assert chat_get_message_read_receipts.get("success")
     assert "receipts" in chat_get_message_read_receipts
 
-
+@pytest.mark.asyncio
 def test_chat_report_message(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
@@ -161,7 +161,7 @@ def test_chat_report_message(logged_rocket):
     ).json()
     assert chat_get_message_report_message.get("success")
 
-
+@pytest.mark.asyncio
 def test_chat_follow_message(logged_rocket):
     message_id = (
         logged_rocket.chat_post_message("hello", channel="GENERAL")
