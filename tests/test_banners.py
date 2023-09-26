@@ -1,4 +1,7 @@
-def test_banners(logged_rocket):
+import pytest
+
+@pytest.mark.asyncio
+async def test_banners(logged_rocket):
     banners = logged_rocket.banners(platform="web").json()
     assert banners.get("success")
     assert "banners" in banners
