@@ -50,22 +50,6 @@ async def main():
 asyncio.run(main())
 ```
  
-#### Using a token for authentication instead of user and password
-
-```python
-from pprint import pprint
-from rocketchat_API.rocketchat import RocketChat
-
-rocket = RocketChat(user_id='WPXGmQ64S3BXdCRb6', auth_token='jvNyOYw2f0YKwtiFS06Fk21HBRBBuV7zI43HmkNzI_s', server_url='https://demo.rocket.chat')
-pprint(rocket.me().json())
-```
-
-### Method parameters
-Only required parameters are explicit on the RocketChat class but you can still use all other parameters. For a detailed parameters list check the [Rocket chat API](https://developer.rocket.chat/reference/api/rest-api)
-
-### API coverage
-Most of the API methods are already implemented. If you are interested in a specific call just open an issue or open a pull request.
-
 ### Tests
 We are actively testing :) 
 
@@ -77,8 +61,3 @@ Tests run on a Rocket.Chat Docker container so install Docker and docker-compose
 You can contribute by doing Pull Requests. (It may take a while to merge your code but if it's good it will be merged). Please, try to implement tests for all your code and use a PEP8 compliant code style.
 
 Reporting bugs and asking for features is also contributing ;) Feel free to help us grow by registering issues.
-
-We hang out [here](https://open.rocket.chat/channel/python_rocketchat_api) if you want to talk. 
-
-### Supporters
-![JetBrains](https://www.jetbrains.com/company/brand/img/logo6.svg) [JetBrains](https://www.jetbrains.com/) supports this project by providing us with licenses for their fantastic products.
