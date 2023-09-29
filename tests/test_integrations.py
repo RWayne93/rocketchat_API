@@ -10,8 +10,9 @@ GENERAL_CHANNEL = "#general"
 
 
 @pytest.fixture(autouse=True)
-def integrations_create_webhook_incoming(logged_rocket):
-    return logged_rocket.integrations_create(
+@pytest.mark.asyncio
+async def integrations_create_webhook_incoming(logged_rocket):
+    return await logged_rocket.integrations_create(
         integrations_type="webhook-incoming",
         name=str(uuid1()),
         enabled=True,
@@ -84,9 +85,9 @@ def test_integrations_update(integrations_create_webhook_incoming, logged_rocket
         .get("success")
     )
 
-
-def test_integration_invalid_type(logged_rocket):
-    with pytest.raises(RocketUnsuportedIntegrationType):
+@pytest.mark.asyncio
+async def test_integration_invalid_type(logged_rocket):
+    with await pytest.raises(RocketUnsuportedIntegrationType):
         logged_rocket.integrations_create(
             integrations_type="not-valid-type",
             name=str(uuid1()),
