@@ -1,22 +1,28 @@
 from rocketchat_API.APIExceptions.RocketExceptions import RocketMissingParamException
 from rocketchat_API.APISections.base import RocketChatBase
+from typing import Dict, Optional, Any
+from httpx import Response
 
 class RocketChatChat(RocketChatBase):
-    async def chat_post_message(self, text, room_id=None, channel=None, **kwargs):
+    async def chat_post_message(self, 
+                                text: str,
+                                room_id: Optional[str] = None,
+                                channel: Optional[str] = None,
+                                **kwargs: Any) -> Response:
         """Posts a new chat message."""
         if room_id:
             if text:
                 return await self.call_api_post(
-                    "chat.postMessage", roomId=room_id, text=text, kwargs=kwargs
+                    "chat.postMessage", roomId=room_id, text=text, **kwargs
                 )
-            return await self.call_api_post("chat.postMessage", roomId=room_id, kwargs=kwargs)
+            return await self.call_api_post("chat.postMessage", roomId=room_id, **kwargs)
         if channel:
             if text:
                 return await self.call_api_post(
-                    "chat.postMessage", channel=channel, text=text, kwargs=kwargs
+                    "chat.postMessage", channel=channel, text=text, **kwargs
                 )
             return await self.call_api_post(
-                "chat.postMessage", channel=channel, kwargs=kwargs
+                "chat.postMessage", channel=channel, **kwargs
             )
         raise RocketMissingParamException("roomId or channel required")
 
