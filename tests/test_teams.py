@@ -1,9 +1,11 @@
 import uuid
+import pytest
 
 
-def test_team_create(logged_rocket):
+@pytest.mark.asyncio
+async def test_team_create(logged_rocket):
     name = str(uuid.uuid1())
-    team_create = logged_rocket.teams_create(
+    team_create = await logged_rocket.teams_create(
         name=name,
         team_type=1,
     ).json()
