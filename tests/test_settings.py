@@ -3,7 +3,9 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_settings(logged_rocket):
-    settings = await logged_rocket.settings().json()
+    #settings = await logged_rocket.settings().json()
+    response = await logged_rocket.settings()
+    settings = await response.json()
     assert settings.get("success")
     settings_get = await logged_rocket.settings_get(_id="API_Allow_Infinite_Count").json()
     assert settings_get.get("success")
@@ -15,7 +17,9 @@ async def test_settings(logged_rocket):
 
 @pytest.mark.asyncio
 async def test_settings_public(rocket):
-    settings_public = await rocket.settings_public().json()
+    #settings_public = await rocket.settings_public().json()
+    response = await rocket.settings_public()
+    settings_public = await response.json()
     assert settings_public.get("success")
     assert "settings" in settings_public
 
@@ -53,6 +57,8 @@ async def test_settings_oauth(logged_rocket):
 
 @pytest.mark.asyncio
 async def test_service_configurations(rocket):
-    service_configurations = await rocket.service_configurations().json()
+    #service_configurations = await rocket.service_configurations().json()
+    response = await rocket.service_configurations()
+    service_configurations = await response.json()
     assert service_configurations.get("success")
     assert "configurations" in service_configurations
