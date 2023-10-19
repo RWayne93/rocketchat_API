@@ -1,6 +1,6 @@
 import re
 import httpx
-import asyncio
+#import asyncio
 from typing import Optional, Dict, Any
 
 from rocketchat_API.APIExceptions.RocketExceptions import (
@@ -26,6 +26,9 @@ class RocketChatBase:
     ) -> None:
 
         self.headers: Dict[str, str] = {}
+        self.user: Optional[str] = user
+        self.password: Optional[str] = password
+        self.server_url: str = server_url
         self.server_url: str = server_url
         self.proxies: Optional[Dict[str, str]] = proxies
         self.ssl_verify: bool = ssl_verify
@@ -34,13 +37,43 @@ class RocketChatBase:
         self.req: httpx.AsyncClient = session or httpx.AsyncClient()
 
         # If user and password are provided, schedule the login coroutine
-        if user and password:
-            self.login_task: asyncio.Task = asyncio.create_task(self.login(user, password))
-        elif auth_token and user_id:
-            self.headers["X-Auth-Token"] = auth_token
-            self.headers["X-User-Id"] = user_id
-        else:
-            self.login_task: Optional[asyncio.Task] = None
+        # if user and password:
+        #     self.login_task: asyncio.Task = asyncio.create_task(self.login(user, password))
+        # elif auth_token and user_id:
+        #     self.headers["X-Auth-Token"] = auth_token
+        #     self.headers["X-User-Id"] = user_id
+        # else:
+        #     self.login_task: Optional[asyncio.Task] = None
+
+    @classmethod
+    async def create(
+        cls, 
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        auth_token: Optional[str] = None,
+        user_id: Optional[str] = None,
+        server_url: str = "http://127.0.0.1:3000",
+        ssl_verify: bool = True,
+        proxies: Optional[Dict[str, str]] = None,
+        timeout: int = 30,
+        session: Optional[httpx.AsyncClient] = None,
+        client_certs: Optional[str] = None
+    ):
+        instance = cls(
+            user=user,
+            password=password,
+            auth_token=auth_token,
+            user_id=user_id,
+            server_url=server_url,
+            ssl_verify=ssl_verify,
+            proxies=proxies,
+            timeout=timeout,
+            session=session,
+            client_certs=client_certs
+        )
+        if instance.user and instance.password:
+            await instance.login(instance.user, instance.password)
+        return instance
 
     @staticmethod
     def __reduce_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
