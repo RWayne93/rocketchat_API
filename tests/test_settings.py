@@ -3,7 +3,6 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_settings(logged_rocket):
-    #settings = await logged_rocket.settings().json()
     response = await logged_rocket.settings()
     settings = await response.json()
     assert settings.get("success")
